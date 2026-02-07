@@ -3,6 +3,7 @@ package com.sanity.service;
 import com.sanity.dto.*;
 import com.sanity.model.*;
 import com.sanity.repository.*;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,13 +29,20 @@ public class AuthService {
             throw new RuntimeException("El correo ya está registrado");
         }
         
-        if (personaRepository.existsByCedula(request.getCedula())) {
-            throw new RuntimeException("La cédula ya está registrada");
+        // Validar cédula solo si viene en el request
+        if (request.getCedula() != null && !request.getCedula().isBlank()) {
+            if (personaRepository.existsByCedula(request.getCedula())) {
+                throw new RuntimeException("La cédula ya está registrada");
+            }
         }
+        
+        // Asignar automáticamente TipoUsuario.USUARIO si no viene especificado
+        TipoUsuario tipoUsuario = request.getTipoUsuario() != null ? 
+            request.getTipoUsuario() : TipoUsuario.USUARIO;
         
         Persona persona;
         
-        if (request.getTipoUsuario() == TipoUsuario.USUARIO) {
+        if (tipoUsuario == TipoUsuario.USUARIO) {
             Usuario usuario = new Usuario();
             usuario.setNombre(request.getNombre());
             usuario.setCorreo(request.getCorreo());
@@ -99,5 +107,28 @@ public class AuthService {
         }
         
         return dto;
+    }
+    private final GoogleAuthService googleAuthService;
+
+    public AuthResponseDto loginWithGoogle(GoogleLoginDto request) {
+        // Valida el token con Google
+        String correo = googleAuthService.validarTokenGoogle(request.getToken());
+
+        // Busca o crea el usuario
+        Persona persona = personaRepository.findByCorreo(correo)
+                .orElseGet(() -> {
+                    Usuario usuario = new Usuario();
+                    usuario.setNombre("Usuario Google");
+                    usuario.setCorreo(correo);
+                    usuario.setContraseña(passwordEncoder.encode("google-oauth-" + System.nanoTime()));
+                    usuario.setTipoUsuario(TipoUsuario.USUARIO);
+
+                    return usuarioRepository.save(usuario);
+                });
+
+        String token = jwtService.generateToken(persona.getCorreo());
+        PersonaDto personaDto = convertToDto(persona);
+
+        return new AuthResponseDto(token, personaDto);
     }
 }

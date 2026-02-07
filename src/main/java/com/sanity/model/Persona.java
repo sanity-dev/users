@@ -30,7 +30,7 @@ public class Persona {
     @Column(length = 20)
     private String telefono;
     
-    @Column(nullable = false, unique = true, length = 20)
+    @Column(nullable = true, unique = true, length = 20)
     private String cedula;
     
     @Enumerated(EnumType.STRING)
