@@ -19,10 +19,8 @@ public class RegisterDto {
     
     private String telefono;
     
-    @NotBlank(message = "La cédula es obligatoria")
     private String cedula;
     
-    @NotNull(message = "El tipo de usuario es obligatorio")
     private TipoUsuario tipoUsuario;
 
     // Constructores
