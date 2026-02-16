@@ -104,12 +104,12 @@ public class PersonaService {
         Terapeuta terapeuta = (Terapeuta) persona;
         
         // Validar tarjeta profesional si se está actualizando
-        if (request.getNTarjetaProfesional() != null && 
-            !request.getNTarjetaProfesional().equals(terapeuta.getNTarjetaProfesional())) {
-            if (terapeutaRepository.existsBynTarjetaProfesional(request.getNTarjetaProfesional())) {
+        if (request.getTarjetaProfesional() != null && 
+            !request.getTarjetaProfesional().equals(terapeuta.getTarjetaProfesional())) {
+            if (terapeutaRepository.existsByTarjetaProfesional(request.getTarjetaProfesional())) {
                 throw new RuntimeException("La tarjeta profesional ya está registrada");
             }
-            terapeuta.setNTarjetaProfesional(request.getNTarjetaProfesional());
+            terapeuta.setTarjetaProfesional(request.getTarjetaProfesional());
         }
         
         // Actualizar o crear ficha profesional
@@ -163,7 +163,7 @@ public class PersonaService {
             dto.setTelefonoContactoEmergencia(usuario.getTelefonoContactoEmergencia());
         } else if (persona instanceof Terapeuta) {
             Terapeuta terapeuta = (Terapeuta) persona;
-            dto.setNTarjetaProfesional(terapeuta.getNTarjetaProfesional());
+            dto.setTarjetaProfesional(terapeuta.getTarjetaProfesional());
         }
         
         return dto;

@@ -15,14 +15,14 @@ public class PersonaDto {
     private String telefonoContactoEmergencia;
     
     // Campos de Terapeuta
-    private String nTarjetaProfesional;
+    private String tarjetaProfesional;
 
     // Constructores
     public PersonaDto() {}
 
     public PersonaDto(Integer idPersona, String nombre, String correo, String telefono, String cedula, 
                       TipoUsuario tipoUsuario, String contactoEmergencia, String telefonoContactoEmergencia, 
-                      String nTarjetaProfesional) {
+                      String tarjetaProfesional) {
         this.idPersona = idPersona;
         this.nombre = nombre;
         this.correo = correo;
@@ -31,7 +31,7 @@ public class PersonaDto {
         this.tipoUsuario = tipoUsuario;
         this.contactoEmergencia = contactoEmergencia;
         this.telefonoContactoEmergencia = telefonoContactoEmergencia;
-        this.nTarjetaProfesional = nTarjetaProfesional;
+        this.tarjetaProfesional = tarjetaProfesional;
     }
 
     // Getters y Setters
@@ -99,11 +99,11 @@ public class PersonaDto {
         this.telefonoContactoEmergencia = telefonoContactoEmergencia;
     }
 
-    public String getNTarjetaProfesional() {
-        return nTarjetaProfesional;
+    public String getTarjetaProfesional() {
+        return tarjetaProfesional;
     }
 
-    public void setNTarjetaProfesional(String nTarjetaProfesional) {
-        this.nTarjetaProfesional = nTarjetaProfesional;
+    public void setTarjetaProfesional(String tarjetaProfesional) {
+        this.tarjetaProfesional = tarjetaProfesional;
     }
 }

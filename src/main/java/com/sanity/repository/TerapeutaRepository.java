@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TerapeutaRepository extends JpaRepository<Terapeuta, Integer> {
-    boolean existsBynTarjetaProfesional(String nTarjetaProfesional);
+    boolean existsByTarjetaProfesional(String tarjetaProfesional);
 }

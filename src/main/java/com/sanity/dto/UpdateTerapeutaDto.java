@@ -1,7 +1,7 @@
 package com.sanity.dto;
 
 public class UpdateTerapeutaDto {
-    private String nTarjetaProfesional;
+    private String tarjetaProfesional;
     private String certificadoTituloProfesional;
     private String certificadoExpLaboral;
     private String certificadoEspecializacionMaestria;
@@ -11,19 +11,19 @@ public class UpdateTerapeutaDto {
 
     public UpdateTerapeutaDto(String nTarjetaProfesional, String certificadoTituloProfesional, 
                               String certificadoExpLaboral, String certificadoEspecializacionMaestria) {
-        this.nTarjetaProfesional = nTarjetaProfesional;
+        this.tarjetaProfesional = nTarjetaProfesional;
         this.certificadoTituloProfesional = certificadoTituloProfesional;
         this.certificadoExpLaboral = certificadoExpLaboral;
         this.certificadoEspecializacionMaestria = certificadoEspecializacionMaestria;
     }
 
     // Getters y Setters
-    public String getNTarjetaProfesional() {
-        return nTarjetaProfesional;
+    public String getTarjetaProfesional() {
+        return tarjetaProfesional;
     }
 
-    public void setNTarjetaProfesional(String nTarjetaProfesional) {
-        this.nTarjetaProfesional = nTarjetaProfesional;
+    public void setTarjetaProfesional(String tarjetaProfesional) {
+        this.tarjetaProfesional = tarjetaProfesional;
     }
 
     public String getCertificadoTituloProfesional() {

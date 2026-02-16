@@ -4,6 +4,7 @@ import com.sanity.dto.AuthResponseDto;
 import com.sanity.dto.GoogleLoginDto;
 import com.sanity.dto.LoginDto;
 import com.sanity.dto.RegisterDto;
+import com.sanity.dto.TherapistRegisterDto;
 import com.sanity.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,5 +31,10 @@ public class AuthController {
     @PostMapping("/google")
     public ResponseEntity<AuthResponseDto> loginWithGoogle(@Valid @RequestBody GoogleLoginDto request) {
         return ResponseEntity.ok(authService.loginWithGoogle(request));
+    }
+    
+    @PostMapping("/register-therapist")
+    public ResponseEntity<AuthResponseDto> registerTherapist(@Valid @RequestBody TherapistRegisterDto request) {
+        return ResponseEntity.ok(authService.registerTherapist(request));
     }
 }

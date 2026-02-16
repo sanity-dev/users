@@ -103,7 +103,7 @@ public class AuthService {
             dto.setTelefonoContactoEmergencia(usuario.getTelefonoContactoEmergencia());
         } else if (persona instanceof Terapeuta) {
             Terapeuta terapeuta = (Terapeuta) persona;
-            dto.setNTarjetaProfesional(terapeuta.getNTarjetaProfesional());
+            dto.setTarjetaProfesional(terapeuta.getTarjetaProfesional());
         }
         
         return dto;
@@ -129,6 +129,39 @@ public class AuthService {
         String token = jwtService.generateToken(persona.getCorreo());
         PersonaDto personaDto = convertToDto(persona);
 
+        return new AuthResponseDto(token, personaDto);
+    }
+    
+    @Transactional
+    public AuthResponseDto registerTherapist(TherapistRegisterDto request) {
+        // Validaciones
+        if (personaRepository.existsByCorreo(request.getCorreo())) {
+            throw new RuntimeException("El correo ya está registrado");
+        }
+        
+        if (personaRepository.existsByCedula(request.getCedula())) {
+            throw new RuntimeException("La cédula ya está registrada");
+        }
+        
+        // Validar que la tarjeta profesional no esté registrada (si es necesario)
+        if (terapeutaRepository.existsByTarjetaProfesional(request.getTarjetaProfesional())) {
+            throw new RuntimeException("El número de tarjeta profesional ya está registrado");
+        }
+        
+        Terapeuta terapeuta = new Terapeuta();
+        terapeuta.setNombre(request.getNombre());
+        terapeuta.setCorreo(request.getCorreo());
+        terapeuta.setContraseña(passwordEncoder.encode(request.getContraseña()));
+        terapeuta.setCedula(request.getCedula());
+        terapeuta.setTarjetaProfesional(request.getTarjetaProfesional());
+        terapeuta.setTelefono(request.getTelefono());
+        terapeuta.setTipoUsuario(TipoUsuario.TERAPEUTA);
+        
+        terapeuta = terapeutaRepository.save(terapeuta);
+        
+        String token = jwtService.generateToken(terapeuta.getCorreo());
+        PersonaDto personaDto = convertToDto(terapeuta);
+        
         return new AuthResponseDto(token, personaDto);
     }
 }
