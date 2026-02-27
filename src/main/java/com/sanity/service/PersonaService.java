@@ -141,6 +141,15 @@ public class PersonaService {
     }
     
     @Transactional
+    public PersonaDto updateFotoPerfil(Integer id, String fotoUrl) {
+        Persona persona = personaRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Persona no encontrada con id: " + id));
+        persona.setFotoPerfilUrl(fotoUrl);
+        persona = personaRepository.save(persona);
+        return convertToDto(persona);
+    }
+
+    @Transactional
     public void deletePersona(Integer id) {
         if (!personaRepository.existsById(id)) {
             throw new RuntimeException("Persona no encontrada con id: " + id);
@@ -156,6 +165,7 @@ public class PersonaService {
         dto.setTelefono(persona.getTelefono());
         dto.setCedula(persona.getCedula());
         dto.setTipoUsuario(persona.getTipoUsuario());
+        dto.setFotoPerfilUrl(persona.getFotoPerfilUrl());
         
         if (persona instanceof Usuario) {
             Usuario usuario = (Usuario) persona;

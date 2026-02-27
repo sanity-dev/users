@@ -9,6 +9,7 @@ public class PersonaDto {
     private String telefono;
     private String cedula;
     private TipoUsuario tipoUsuario;
+    private String fotoPerfilUrl;
     
     // Campos de Usuario
     private String contactoEmergencia;
@@ -105,5 +106,13 @@ public class PersonaDto {
 
     public void setTarjetaProfesional(String tarjetaProfesional) {
         this.tarjetaProfesional = tarjetaProfesional;
+    }
+
+    public String getFotoPerfilUrl() {
+        return fotoPerfilUrl;
+    }
+
+    public void setFotoPerfilUrl(String fotoPerfilUrl) {
+        this.fotoPerfilUrl = fotoPerfilUrl;
     }
 }
