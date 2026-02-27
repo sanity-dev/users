@@ -1,5 +1,6 @@
 package com.sanity.service;
 
+import com.sanity.dto.DocumentVerificationResultDto;
 import com.sanity.model.DocumentoTerapeuta;
 import com.sanity.model.Persona;
 import com.sanity.model.Terapeuta;
@@ -23,9 +24,10 @@ public class DocumentService {
     private final CloudStorageService cloudStorageService;
     private final DocumentoTerapeutaRepository documentoRepository;
     private final PersonaRepository personaRepository;
+    private final DocumentVerificationService verificationService;
 
     /**
-     * Sube un documento del terapeuta a GCS y guarda los metadatos en BD.
+     * Sube un documento del terapeuta a GCS, guarda metadatos en BD, y ejecuta verificación automática.
      */
     public DocumentoTerapeuta uploadDocument(String correoTerapeuta, MultipartFile file, String tipoDocumento)
             throws IOException {
@@ -60,6 +62,8 @@ public class DocumentService {
             documento.setTamanoBytes(file.getSize());
             documento.setEstado("PENDIENTE");
             documento.setFechaSubida(LocalDateTime.now());
+            documento.setMotivoRechazo(null);
+            documento.setTextoExtraido(null);
         } else {
             documento = new DocumentoTerapeuta();
             documento.setTerapeuta(terapeuta);
@@ -72,7 +76,16 @@ public class DocumentService {
             documento.setFechaSubida(LocalDateTime.now());
         }
 
-        return documentoRepository.save(documento);
+        documento = documentoRepository.save(documento);
+
+        // Ejecutar verificación automática con Vision API
+        try {
+            verificationService.verifyDocument(documento, terapeuta);
+        } catch (Exception e) {
+            System.err.println("⚠️ Error en verificación automática (el documento queda PENDIENTE): " + e.getMessage());
+        }
+
+        return documento;
     }
 
     /**
@@ -108,11 +121,14 @@ public class DocumentService {
 
         // Mapear documentos al formato esperado por el frontend
         List<Map<String, String>> docs = documentos.stream()
-                .map(d -> Map.of(
-                        "type", d.getTipoDocumento(),
-                        "status", d.getEstado().toLowerCase(),
-                        "uploadedAt", d.getFechaSubida().toString()
-                ))
+                .map(d -> {
+                    java.util.HashMap<String, String> map = new java.util.HashMap<>();
+                    map.put("type", d.getTipoDocumento());
+                    map.put("status", d.getEstado().toLowerCase());
+                    map.put("uploadedAt", d.getFechaSubida().toString());
+                    map.put("motivoRechazo", d.getMotivoRechazo() != null ? d.getMotivoRechazo() : "");
+                    return (Map<String, String>) map;
+                })
                 .collect(Collectors.toList());
 
         return Map.of(

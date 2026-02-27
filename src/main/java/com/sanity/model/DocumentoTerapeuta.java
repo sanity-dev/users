@@ -43,4 +43,10 @@ public class DocumentoTerapeuta {
 
     @Column(name = "fecha_subida", nullable = false)
     private LocalDateTime fechaSubida = LocalDateTime.now();
+
+    @Column(name = "motivo_rechazo", length = 1000)
+    private String motivoRechazo;
+
+    @Column(name = "texto_extraido", columnDefinition = "TEXT")
+    private String textoExtraido;
 }

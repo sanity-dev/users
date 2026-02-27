@@ -23,6 +23,7 @@ public class DocumentController {
      * POST /api/documents/upload
      * Recibe un archivo multipart y el tipo de documento.
      * El terapeuta se identifica por el JWT (correo en el SecurityContext).
+     * Ahora incluye verificación automática con Vision API.
      */
     @PostMapping("/upload")
     public ResponseEntity<DocumentUploadResponseDto> uploadDocument(
@@ -36,8 +37,10 @@ public class DocumentController {
 
             return ResponseEntity.ok(
                     DocumentUploadResponseDto.ok(
-                            "Documento subido exitosamente",
-                            documento.getId()
+                            "Documento subido y verificado automáticamente",
+                            documento.getId(),
+                            documento.getEstado(),
+                            documento.getMotivoRechazo()
                     )
             );
         } catch (IllegalArgumentException e) {
