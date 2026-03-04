@@ -87,6 +87,12 @@ public class PersonaService {
         if (request.getTelefonoContactoEmergencia() != null) {
             usuario.setTelefonoContactoEmergencia(request.getTelefonoContactoEmergencia());
         }
+        if (request.getMensajeEmergencia() != null) {
+            usuario.setMensajeEmergencia(request.getMensajeEmergencia());
+        }
+        if (request.getTelefonoApoyoAlternativo() != null) {
+            usuario.setTelefonoApoyoAlternativo(request.getTelefonoApoyoAlternativo());
+        }
         
         usuario = usuarioRepository.save(usuario);
         return convertToDto(usuario);
@@ -171,6 +177,8 @@ public class PersonaService {
             Usuario usuario = (Usuario) persona;
             dto.setContactoEmergencia(usuario.getContactoEmergencia());
             dto.setTelefonoContactoEmergencia(usuario.getTelefonoContactoEmergencia());
+            dto.setMensajeEmergencia(usuario.getMensajeEmergencia());
+            dto.setTelefonoApoyoAlternativo(usuario.getTelefonoApoyoAlternativo());
         } else if (persona instanceof Terapeuta) {
             Terapeuta terapeuta = (Terapeuta) persona;
             dto.setTarjetaProfesional(terapeuta.getTarjetaProfesional());

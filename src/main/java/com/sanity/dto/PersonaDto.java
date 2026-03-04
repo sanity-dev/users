@@ -14,6 +14,8 @@ public class PersonaDto {
     // Campos de Usuario
     private String contactoEmergencia;
     private String telefonoContactoEmergencia;
+    private String mensajeEmergencia;
+    private String telefonoApoyoAlternativo;
     
     // Campos de Terapeuta
     private String tarjetaProfesional;
@@ -98,6 +100,22 @@ public class PersonaDto {
 
     public void setTelefonoContactoEmergencia(String telefonoContactoEmergencia) {
         this.telefonoContactoEmergencia = telefonoContactoEmergencia;
+    }
+
+    public String getMensajeEmergencia() {
+        return mensajeEmergencia;
+    }
+
+    public void setMensajeEmergencia(String mensajeEmergencia) {
+        this.mensajeEmergencia = mensajeEmergencia;
+    }
+
+    public String getTelefonoApoyoAlternativo() {
+        return telefonoApoyoAlternativo;
+    }
+
+    public void setTelefonoApoyoAlternativo(String telefonoApoyoAlternativo) {
+        this.telefonoApoyoAlternativo = telefonoApoyoAlternativo;
     }
 
     public String getTarjetaProfesional() {

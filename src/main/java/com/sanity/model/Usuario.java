@@ -18,6 +18,12 @@ public class Usuario extends Persona {
     @Column(name = "contacto_emergencia", length = 100)
     private String contactoEmergencia;
     
-    @Column(name = "telefono_contacto_emergencia", length = 20)
+    @Column(name = "telefono_contacto_emergencia", length = 100)
     private String telefonoContactoEmergencia;
+
+    @Column(name = "mensaje_emergencia", length = 500)
+    private String mensajeEmergencia;
+
+    @Column(name = "telefono_apoyo_alternativo", length = 20)
+    private String telefonoApoyoAlternativo;
 }
