@@ -1,6 +1,12 @@
 target/
 .git/
 .gitignore
+.gitattributes
 *.md
 .env
 .DS_Store
+.classpath
+.project
+.settings/
+.mvn/
+docker-compose.yaml

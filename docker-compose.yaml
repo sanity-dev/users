@@ -1,21 +1,25 @@
 version: '3.8'
 
 services:
-  sanity-app:
-    build: .
-    container_name: sanity-app
+  micro-users:
+    image: cmarioa/micro-users:latest
+    container_name: micro-users
     ports:
-      - "8080:8080"
+      - "8081:8081"
     environment:
-      - SPRING_APPLICATION_NAME=sanity-app
+      # ---- Base de datos Azure SQL ----
       - SPRING_DATASOURCE_URL=jdbc:sqlserver://carlosedusql.database.windows.net:1433;databaseName=carlosdb;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30
       - SPRING_DATASOURCE_USERNAME=carlosadmin@carlosedusql
       - SPRING_DATASOURCE_PASSWORD=Admin1234
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.microsoft.sqlserver.jdbc.SQLServerDriver
+      # ---- JPA / Hibernate ----
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - SPRING_JPA_SHOW_SQL=true
       - SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true
       - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.SQLServerDialect
+      # ---- JWT ----
       - JWT_SECRET=MiClaveSecretaSuperSeguraParaJWTDebeSerMuyLarga123456789
       - JWT_EXPIRATION=86400000
+      # ---- Google Cloud Storage ----
+      - GCS_BUCKET_NAME=115305318075-us-central1-blueprint-config
     restart: unless-stopped
