@@ -22,4 +22,6 @@ services:
       - JWT_EXPIRATION=86400000
       # ---- Google Cloud Storage ----
       - GCS_BUCKET_NAME=115305318075-us-central1-blueprint-config
+      # ---- Google OAuth ----
+      - GOOGLE_CLIENT_ID=115305318075-1c1e643qv39lcpodq866dpde6am7lo7a.apps.googleusercontent.com
     restart: unless-stopped
