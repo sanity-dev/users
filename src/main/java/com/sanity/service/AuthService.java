@@ -96,6 +96,7 @@ public class AuthService {
         dto.setTelefono(persona.getTelefono());
         dto.setCedula(persona.getCedula());
         dto.setTipoUsuario(persona.getTipoUsuario());
+        dto.setFotoPerfilUrl(persona.getFotoPerfilUrl());
         
         if (persona instanceof Usuario) {
             Usuario usuario = (Usuario) persona;
@@ -111,20 +112,35 @@ public class AuthService {
     private final GoogleAuthService googleAuthService;
 
     public AuthResponseDto loginWithGoogle(GoogleLoginDto request) {
-        // Valida el token con Google
-        String correo = googleAuthService.validarTokenGoogle(request.getToken());
+        // Obtener info completa del usuario de Google (nombre, correo, foto)
+        GoogleUserInfo googleUser = googleAuthService.obtenerInfoUsuario(request.getToken());
 
         // Busca o crea el usuario
-        Persona persona = personaRepository.findByCorreo(correo)
+        Persona persona = personaRepository.findByCorreo(googleUser.getEmail())
                 .orElseGet(() -> {
                     Usuario usuario = new Usuario();
-                    usuario.setNombre("Usuario Google");
-                    usuario.setCorreo(correo);
+                    usuario.setNombre(googleUser.getName() != null ? googleUser.getName() : "Usuario Google");
+                    usuario.setCorreo(googleUser.getEmail());
                     usuario.setContraseña(passwordEncoder.encode("google-oauth-" + System.nanoTime()));
                     usuario.setTipoUsuario(TipoUsuario.USUARIO);
+                    usuario.setFotoPerfilUrl(googleUser.getPicture());
 
                     return usuarioRepository.save(usuario);
                 });
+
+        // Actualizar nombre y foto si el usuario ya existe pero no los tiene
+        boolean updated = false;
+        if ((persona.getNombre() == null || persona.getNombre().equals("Usuario Google")) && googleUser.getName() != null) {
+            persona.setNombre(googleUser.getName());
+            updated = true;
+        }
+        if (persona.getFotoPerfilUrl() == null && googleUser.getPicture() != null) {
+            persona.setFotoPerfilUrl(googleUser.getPicture());
+            updated = true;
+        }
+        if (updated) {
+            personaRepository.save(persona);
+        }
 
         String token = jwtService.generateToken(persona.getCorreo());
         PersonaDto personaDto = convertToDto(persona);

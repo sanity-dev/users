@@ -2,9 +2,10 @@ package com.sanity.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sanity.dto.GoogleUserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -17,6 +18,9 @@ public class GoogleAuthService {
 
     private static final String GOOGLE_TOKEN_VERIFICATION_URL =
             "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=";
+
+    private static final String GOOGLE_USERINFO_URL =
+            "https://www.googleapis.com/oauth2/v3/userinfo";
 
     /**
      * Valida el token de Google y extrae el correo
@@ -49,5 +53,44 @@ public class GoogleAuthService {
         }
 
         throw new RuntimeException("No se pudo validar el token de Google");
+    }
+
+    /**
+     * Obtiene la información del usuario de Google (nombre, correo, foto de perfil)
+     */
+    public GoogleUserInfo obtenerInfoUsuario(String accessToken) {
+        try {
+            // Primero validar el token
+            validarTokenGoogle(accessToken);
+
+            // Luego obtener la info del usuario
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    GOOGLE_USERINFO_URL, HttpMethod.GET, entity, String.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode jsonNode = objectMapper.readTree(response.getBody());
+
+                String email = jsonNode.has("email") ? jsonNode.get("email").asText() : null;
+                String name = jsonNode.has("name") ? jsonNode.get("name").asText() : null;
+                String picture = jsonNode.has("picture") ? jsonNode.get("picture").asText() : null;
+
+                log.info("Info de usuario Google obtenida. Email: {}, Nombre: {}", email, name);
+                return new GoogleUserInfo(email, name, picture);
+            }
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error obteniendo info de usuario de Google: {}", e.getMessage());
+            throw new RuntimeException("Error al obtener información del usuario de Google: " + e.getMessage());
+        }
+
+        throw new RuntimeException("No se pudo obtener la información del usuario de Google");
     }
 }
