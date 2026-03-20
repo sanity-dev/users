@@ -39,7 +39,7 @@ public class SecurityConfig {
             .cors(cors -> cors.disable()) // CORS lo maneja el API Gateway
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/auth/**", "/api/personas/exists", "/api/personas/reset-password").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
