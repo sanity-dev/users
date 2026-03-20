@@ -96,6 +96,7 @@ public class AuthService {
         dto.setTelefono(persona.getTelefono());
         dto.setCedula(persona.getCedula());
         dto.setTipoUsuario(persona.getTipoUsuario());
+        dto.setFotoPerfilUrl(persona.getFotoPerfilUrl());
         
         if (persona instanceof Usuario) {
             Usuario usuario = (Usuario) persona;
@@ -103,7 +104,7 @@ public class AuthService {
             dto.setTelefonoContactoEmergencia(usuario.getTelefonoContactoEmergencia());
         } else if (persona instanceof Terapeuta) {
             Terapeuta terapeuta = (Terapeuta) persona;
-            dto.setNTarjetaProfesional(terapeuta.getNTarjetaProfesional());
+            dto.setTarjetaProfesional(terapeuta.getTarjetaProfesional());
         }
         
         return dto;
@@ -111,24 +112,72 @@ public class AuthService {
     private final GoogleAuthService googleAuthService;
 
     public AuthResponseDto loginWithGoogle(GoogleLoginDto request) {
-        // Valida el token con Google
-        String correo = googleAuthService.validarTokenGoogle(request.getToken());
+        // Obtener info completa del usuario de Google (nombre, correo, foto)
+        GoogleUserInfo googleUser = googleAuthService.obtenerInfoUsuario(request.getToken());
 
         // Busca o crea el usuario
-        Persona persona = personaRepository.findByCorreo(correo)
+        Persona persona = personaRepository.findByCorreo(googleUser.getEmail())
                 .orElseGet(() -> {
                     Usuario usuario = new Usuario();
-                    usuario.setNombre("Usuario Google");
-                    usuario.setCorreo(correo);
+                    usuario.setNombre(googleUser.getName() != null ? googleUser.getName() : "Usuario Google");
+                    usuario.setCorreo(googleUser.getEmail());
                     usuario.setContraseña(passwordEncoder.encode("google-oauth-" + System.nanoTime()));
                     usuario.setTipoUsuario(TipoUsuario.USUARIO);
+                    usuario.setFotoPerfilUrl(googleUser.getPicture());
 
                     return usuarioRepository.save(usuario);
                 });
 
+        // Actualizar nombre y foto si el usuario ya existe pero no los tiene
+        boolean updated = false;
+        if ((persona.getNombre() == null || persona.getNombre().equals("Usuario Google")) && googleUser.getName() != null) {
+            persona.setNombre(googleUser.getName());
+            updated = true;
+        }
+        if (persona.getFotoPerfilUrl() == null && googleUser.getPicture() != null) {
+            persona.setFotoPerfilUrl(googleUser.getPicture());
+            updated = true;
+        }
+        if (updated) {
+            personaRepository.save(persona);
+        }
+
         String token = jwtService.generateToken(persona.getCorreo());
         PersonaDto personaDto = convertToDto(persona);
 
+        return new AuthResponseDto(token, personaDto);
+    }
+    
+    @Transactional
+    public AuthResponseDto registerTherapist(TherapistRegisterDto request) {
+        // Validaciones
+        if (personaRepository.existsByCorreo(request.getCorreo())) {
+            throw new RuntimeException("El correo ya está registrado");
+        }
+        
+        if (personaRepository.existsByCedula(request.getCedula())) {
+            throw new RuntimeException("La cédula ya está registrada");
+        }
+        
+        // Validar que la tarjeta profesional no esté registrada (si es necesario)
+        if (terapeutaRepository.existsByTarjetaProfesional(request.getTarjetaProfesional())) {
+            throw new RuntimeException("El número de tarjeta profesional ya está registrado");
+        }
+        
+        Terapeuta terapeuta = new Terapeuta();
+        terapeuta.setNombre(request.getNombre());
+        terapeuta.setCorreo(request.getCorreo());
+        terapeuta.setContraseña(passwordEncoder.encode(request.getContraseña()));
+        terapeuta.setCedula(request.getCedula());
+        terapeuta.setTarjetaProfesional(request.getTarjetaProfesional());
+        terapeuta.setTelefono(request.getTelefono());
+        terapeuta.setTipoUsuario(TipoUsuario.TERAPEUTA);
+        
+        terapeuta = terapeutaRepository.save(terapeuta);
+        
+        String token = jwtService.generateToken(terapeuta.getCorreo());
+        PersonaDto personaDto = convertToDto(terapeuta);
+        
         return new AuthResponseDto(token, personaDto);
     }
 }

@@ -87,6 +87,12 @@ public class PersonaService {
         if (request.getTelefonoContactoEmergencia() != null) {
             usuario.setTelefonoContactoEmergencia(request.getTelefonoContactoEmergencia());
         }
+        if (request.getMensajeEmergencia() != null) {
+            usuario.setMensajeEmergencia(request.getMensajeEmergencia());
+        }
+        if (request.getTelefonoApoyoAlternativo() != null) {
+            usuario.setTelefonoApoyoAlternativo(request.getTelefonoApoyoAlternativo());
+        }
         
         usuario = usuarioRepository.save(usuario);
         return convertToDto(usuario);
@@ -104,12 +110,12 @@ public class PersonaService {
         Terapeuta terapeuta = (Terapeuta) persona;
         
         // Validar tarjeta profesional si se está actualizando
-        if (request.getNTarjetaProfesional() != null && 
-            !request.getNTarjetaProfesional().equals(terapeuta.getNTarjetaProfesional())) {
-            if (terapeutaRepository.existsBynTarjetaProfesional(request.getNTarjetaProfesional())) {
+        if (request.getTarjetaProfesional() != null && 
+            !request.getTarjetaProfesional().equals(terapeuta.getTarjetaProfesional())) {
+            if (terapeutaRepository.existsByTarjetaProfesional(request.getTarjetaProfesional())) {
                 throw new RuntimeException("La tarjeta profesional ya está registrada");
             }
-            terapeuta.setNTarjetaProfesional(request.getNTarjetaProfesional());
+            terapeuta.setTarjetaProfesional(request.getTarjetaProfesional());
         }
         
         // Actualizar o crear ficha profesional
@@ -141,6 +147,15 @@ public class PersonaService {
     }
     
     @Transactional
+    public PersonaDto updateFotoPerfil(Integer id, String fotoUrl) {
+        Persona persona = personaRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Persona no encontrada con id: " + id));
+        persona.setFotoPerfilUrl(fotoUrl);
+        persona = personaRepository.save(persona);
+        return convertToDto(persona);
+    }
+
+    @Transactional
     public void deletePersona(Integer id) {
         if (!personaRepository.existsById(id)) {
             throw new RuntimeException("Persona no encontrada con id: " + id);
@@ -156,14 +171,17 @@ public class PersonaService {
         dto.setTelefono(persona.getTelefono());
         dto.setCedula(persona.getCedula());
         dto.setTipoUsuario(persona.getTipoUsuario());
+        dto.setFotoPerfilUrl(persona.getFotoPerfilUrl());
         
         if (persona instanceof Usuario) {
             Usuario usuario = (Usuario) persona;
             dto.setContactoEmergencia(usuario.getContactoEmergencia());
             dto.setTelefonoContactoEmergencia(usuario.getTelefonoContactoEmergencia());
+            dto.setMensajeEmergencia(usuario.getMensajeEmergencia());
+            dto.setTelefonoApoyoAlternativo(usuario.getTelefonoApoyoAlternativo());
         } else if (persona instanceof Terapeuta) {
             Terapeuta terapeuta = (Terapeuta) persona;
-            dto.setNTarjetaProfesional(terapeuta.getNTarjetaProfesional());
+            dto.setTarjetaProfesional(terapeuta.getTarjetaProfesional());
         }
         
         return dto;

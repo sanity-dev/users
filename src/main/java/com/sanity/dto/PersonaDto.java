@@ -9,20 +9,23 @@ public class PersonaDto {
     private String telefono;
     private String cedula;
     private TipoUsuario tipoUsuario;
+    private String fotoPerfilUrl;
     
     // Campos de Usuario
     private String contactoEmergencia;
     private String telefonoContactoEmergencia;
+    private String mensajeEmergencia;
+    private String telefonoApoyoAlternativo;
     
     // Campos de Terapeuta
-    private String nTarjetaProfesional;
+    private String tarjetaProfesional;
 
     // Constructores
     public PersonaDto() {}
 
     public PersonaDto(Integer idPersona, String nombre, String correo, String telefono, String cedula, 
                       TipoUsuario tipoUsuario, String contactoEmergencia, String telefonoContactoEmergencia, 
-                      String nTarjetaProfesional) {
+                      String tarjetaProfesional) {
         this.idPersona = idPersona;
         this.nombre = nombre;
         this.correo = correo;
@@ -31,7 +34,7 @@ public class PersonaDto {
         this.tipoUsuario = tipoUsuario;
         this.contactoEmergencia = contactoEmergencia;
         this.telefonoContactoEmergencia = telefonoContactoEmergencia;
-        this.nTarjetaProfesional = nTarjetaProfesional;
+        this.tarjetaProfesional = tarjetaProfesional;
     }
 
     // Getters y Setters
@@ -99,11 +102,35 @@ public class PersonaDto {
         this.telefonoContactoEmergencia = telefonoContactoEmergencia;
     }
 
-    public String getNTarjetaProfesional() {
-        return nTarjetaProfesional;
+    public String getMensajeEmergencia() {
+        return mensajeEmergencia;
     }
 
-    public void setNTarjetaProfesional(String nTarjetaProfesional) {
-        this.nTarjetaProfesional = nTarjetaProfesional;
+    public void setMensajeEmergencia(String mensajeEmergencia) {
+        this.mensajeEmergencia = mensajeEmergencia;
+    }
+
+    public String getTelefonoApoyoAlternativo() {
+        return telefonoApoyoAlternativo;
+    }
+
+    public void setTelefonoApoyoAlternativo(String telefonoApoyoAlternativo) {
+        this.telefonoApoyoAlternativo = telefonoApoyoAlternativo;
+    }
+
+    public String getTarjetaProfesional() {
+        return tarjetaProfesional;
+    }
+
+    public void setTarjetaProfesional(String tarjetaProfesional) {
+        this.tarjetaProfesional = tarjetaProfesional;
+    }
+
+    public String getFotoPerfilUrl() {
+        return fotoPerfilUrl;
+    }
+
+    public void setFotoPerfilUrl(String fotoPerfilUrl) {
+        this.fotoPerfilUrl = fotoPerfilUrl;
     }
 }

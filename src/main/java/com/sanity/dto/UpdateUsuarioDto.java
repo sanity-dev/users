@@ -3,14 +3,11 @@ package com.sanity.dto;
 public class UpdateUsuarioDto {
     private String contactoEmergencia;
     private String telefonoContactoEmergencia;
+    private String mensajeEmergencia;
+    private String telefonoApoyoAlternativo;
 
     // Constructores
     public UpdateUsuarioDto() {}
-
-    public UpdateUsuarioDto(String contactoEmergencia, String telefonoContactoEmergencia) {
-        this.contactoEmergencia = contactoEmergencia;
-        this.telefonoContactoEmergencia = telefonoContactoEmergencia;
-    }
 
     // Getters y Setters
     public String getContactoEmergencia() {
@@ -27,5 +24,21 @@ public class UpdateUsuarioDto {
 
     public void setTelefonoContactoEmergencia(String telefonoContactoEmergencia) {
         this.telefonoContactoEmergencia = telefonoContactoEmergencia;
+    }
+
+    public String getMensajeEmergencia() {
+        return mensajeEmergencia;
+    }
+
+    public void setMensajeEmergencia(String mensajeEmergencia) {
+        this.mensajeEmergencia = mensajeEmergencia;
+    }
+
+    public String getTelefonoApoyoAlternativo() {
+        return telefonoApoyoAlternativo;
+    }
+
+    public void setTelefonoApoyoAlternativo(String telefonoApoyoAlternativo) {
+        this.telefonoApoyoAlternativo = telefonoApoyoAlternativo;
     }
 }

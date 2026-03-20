@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class Terapeuta extends Persona {
     
     @Column(name = "n_tarjeta_profesional", unique = true, length = 50)
-    private String nTarjetaProfesional;
+    private String tarjetaProfesional;
     
     @OneToOne(mappedBy = "terapeuta", cascade = CascadeType.ALL)
     private FichaProfesional fichaProfesional;

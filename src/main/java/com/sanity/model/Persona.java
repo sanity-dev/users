@@ -36,4 +36,7 @@ public class Persona {
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_usuario", nullable = false)
     private TipoUsuario tipoUsuario;
+
+    @Column(name = "foto_perfil_url", length = 500)
+    private String fotoPerfilUrl;
 }
