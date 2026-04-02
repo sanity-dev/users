@@ -83,4 +83,21 @@ public class PersonaController {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
+    
+    // --- NUEVO: Endpoints internos para recuperación desde microservicio notificaciones ---
+    @GetMapping("/exists")
+    public ResponseEntity<Map<String, Boolean>> checkEmailExists(@RequestParam String email) {
+        boolean exists = personaService.existsByCorreo(email);
+        return ResponseEntity.ok(Map.of("exists", exists));
+    }
+
+    @PutMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordInternalDto request) {
+        try {
+            personaService.resetPassword(request.getEmail(), request.getNuevaPassword());
+            return ResponseEntity.ok(Map.of("mensaje", "Contraseña actualizada exitosamente"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }

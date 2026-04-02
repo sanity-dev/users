@@ -167,6 +167,20 @@ public class PersonaService {
         personaRepository.deleteById(id);
     }
     
+    // --- NUEVO: Para recuperación de contraseñas interna (desde microservicio notificaciones) ---
+    public boolean existsByCorreo(String correo) {
+        return personaRepository.existsByCorreo(correo);
+    }
+
+    @Transactional
+    public void resetPassword(String correo, String nuevaPassword) {
+        Persona persona = personaRepository.findByCorreo(correo)
+            .orElseThrow(() -> new RuntimeException("Persona no encontrada con correo: " + correo));
+        
+        persona.setContraseña(passwordEncoder.encode(nuevaPassword));
+        personaRepository.save(persona);
+    }
+    
     private PersonaDto convertToDto(Persona persona) {
         PersonaDto dto = new PersonaDto();
         dto.setIdPersona(persona.getIdPersona());
