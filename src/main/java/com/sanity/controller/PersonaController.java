@@ -74,8 +74,13 @@ public class PersonaController {
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePersona(@PathVariable Integer id) {
-        personaService.deletePersona(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> deletePersona(@PathVariable Integer id, @RequestBody java.util.Map<String, String> body) {
+        try {
+            String contraseña = body.get("contraseña");
+            personaService.deletePersona(id, contraseña);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
     }
 }

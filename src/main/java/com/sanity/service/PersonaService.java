@@ -156,10 +156,14 @@ public class PersonaService {
     }
 
     @Transactional
-    public void deletePersona(Integer id) {
-        if (!personaRepository.existsById(id)) {
-            throw new RuntimeException("Persona no encontrada con id: " + id);
+    public void deletePersona(Integer id, String contraseña) {
+        Persona persona = personaRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Persona no encontrada con id: " + id));
+            
+        if (contraseña == null || !passwordEncoder.matches(contraseña, persona.getContraseña())) {
+            throw new RuntimeException("Contraseña incorrecta");
         }
+        
         personaRepository.deleteById(id);
     }
     
