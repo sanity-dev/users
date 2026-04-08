@@ -49,4 +49,10 @@ public class DocumentoTerapeuta {
 
     @Column(name = "texto_extraido", columnDefinition = "TEXT")
     private String textoExtraido;
+
+    @Column(name = "selfie_url", length = 500)
+    private String selfieUrl;
+
+    @Column(name = "verificacion_facial", length = 20)
+    private String verificacionFacial;
 }
