@@ -206,8 +206,7 @@ public class DocumentVerificationService {
      */
     private DocumentVerificationResultDto verifyTarjetaProfesional(String normalizedText, Terapeuta terapeuta) {
         boolean nombreFound = containsName(normalizedText, terapeuta.getNombre());
-        boolean cedulaFound = terapeuta.getCedula() != null
-                && normalizedText.contains(normalize(terapeuta.getCedula()));
+        boolean cedulaFound = containsCedula(normalizedText, terapeuta.getCedula());
         boolean tarjetaFound = terapeuta.getTarjetaProfesional() != null
                 && normalizedText.contains(normalize(terapeuta.getTarjetaProfesional()));
 
@@ -233,8 +232,7 @@ public class DocumentVerificationService {
      */
     private DocumentVerificationResultDto verifyTitulo(String normalizedText, Terapeuta terapeuta) {
         boolean nombreFound = containsName(normalizedText, terapeuta.getNombre());
-        boolean cedulaFound = terapeuta.getCedula() != null
-                && normalizedText.contains(normalize(terapeuta.getCedula()));
+        boolean cedulaFound = containsCedula(normalizedText, terapeuta.getCedula());
 
         if (nombreFound && cedulaFound) {
             return DocumentVerificationResultDto.success();
@@ -256,8 +254,7 @@ public class DocumentVerificationService {
      */
     private DocumentVerificationResultDto verifyIdentificacion(String normalizedText, Terapeuta terapeuta) {
         boolean nombreFound = containsName(normalizedText, terapeuta.getNombre());
-        boolean cedulaFound = terapeuta.getCedula() != null
-                && normalizedText.contains(normalize(terapeuta.getCedula()));
+        boolean cedulaFound = containsCedula(normalizedText, terapeuta.getCedula());
 
         if (nombreFound && cedulaFound) {
             return DocumentVerificationResultDto.success();
@@ -304,6 +301,23 @@ public class DocumentVerificationService {
             }
         }
         return matchCount >= 2;
+    }
+
+    /**
+     * Verifica si la cédula aparece en el texto, ignorando puntos, comas, espacios y guiones.
+     * Ej: "1094942165" coincide con "1.094.942.165" en el texto OCR.
+     */
+    private boolean containsCedula(String normalizedText, String cedula) {
+        if (cedula == null || cedula.isBlank()) return false;
+        // Extraer solo dígitos de ambos
+        String cedulaDigits = cedula.replaceAll("[^0-9]", "");
+        String textDigits = normalizedText.replaceAll("[^0-9]", "");
+        // También buscar directamente en el texto normalizado (por si coincide tal cual)
+        if (normalizedText.contains(normalize(cedula))) {
+            return true;
+        }
+        // Buscar la secuencia de dígitos en los dígitos del texto
+        return textDigits.contains(cedulaDigits);
     }
 
     /**

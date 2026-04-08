@@ -55,7 +55,8 @@ public class FaceVerificationService {
     }
 
     /**
-     * Verifica el rostro del terapeuta comparando su selfie con la foto del documento de identidad.
+     * Verifica el rostro del terapeuta comparando su selfie con la foto del
+     * documento de identidad.
      */
     public FaceVerificationResultDto verifyFace(String correoTerapeuta, MultipartFile selfieFile) throws IOException {
         // Verificar que Rekognition esté configurado
