@@ -17,12 +17,22 @@ import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.rekognition.RekognitionClient;
 import software.amazon.awssdk.services.rekognition.model.*;
 
+import javax.imageio.ImageIO;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class FaceVerificationService {
+
+    // Límite de Rekognition: 5MB por imagen
+    private static final int MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
     private final RekognitionClient rekognitionClient;
     private final CloudStorageService cloudStorageService;
@@ -90,7 +100,7 @@ public class FaceVerificationService {
         String selfieFolder = "selfies/" + terapeuta.getIdPersona();
         String selfieUrl = cloudStorageService.uploadFile(selfieFile, selfieFolder);
 
-        // 4. Descargar los bytes de ambas imágenes desde GCS
+        // 4. Descargar los bytes del documento desde GCS
         byte[] documentBytes = downloadFromGcs(documento.getUrlStorage());
         byte[] selfieBytes = selfieFile.getBytes();
 
@@ -99,11 +109,24 @@ public class FaceVerificationService {
                     "No se pudo descargar la imagen del documento de identidad.");
         }
 
-        // 5. Llamar a AWS Rekognition CompareFaces
-        try {
-            FaceVerificationResultDto result = compareFaces(documentBytes, selfieBytes, selfieUrl);
+        // 5. Comprimir imágenes si superan el límite de 5MB de Rekognition
+        byte[] docCompressed = compressIfNeeded(documentBytes, "documento");
+        byte[] selfieCompressed = compressIfNeeded(selfieBytes, "selfie");
 
-            // 6. Actualizar el documento con el resultado de la verificación facial
+        if (docCompressed == null) {
+            return FaceVerificationResultDto.error(
+                    "No se pudo procesar la imagen del documento. Asegúrate de subir una imagen JPG o PNG.");
+        }
+        if (selfieCompressed == null) {
+            return FaceVerificationResultDto.error(
+                    "No se pudo procesar la selfie. Asegúrate de que sea una imagen JPG o PNG.");
+        }
+
+        // 6. Llamar a AWS Rekognition CompareFaces
+        try {
+            FaceVerificationResultDto result = compareFaces(docCompressed, selfieCompressed, selfieUrl);
+
+            // 7. Actualizar el documento con el resultado de la verificación facial
             documento.setVerificacionFacial(result.getEstado());
             documento.setSelfieUrl(selfieUrl);
             documentoRepository.save(documento);
@@ -114,6 +137,64 @@ public class FaceVerificationService {
             System.err.println("❌ Error en AWS Rekognition: " + e.getMessage());
             return FaceVerificationResultDto.error(
                     "Error en el servicio de verificación facial: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Comprime la imagen si supera el límite de 5MB de Rekognition.
+     * Redimensiona progresivamente hasta que quepa.
+     */
+    private byte[] compressIfNeeded(byte[] imageBytes, String label) {
+        if (imageBytes == null || imageBytes.length == 0) return null;
+
+        // Si ya está dentro del límite, retornar tal cual
+        if (imageBytes.length <= MAX_IMAGE_BYTES) {
+            System.out.println("✅ " + label + ": " + imageBytes.length + " bytes (dentro del límite)");
+            return imageBytes;
+        }
+
+        System.out.println("🔄 " + label + ": " + imageBytes.length + " bytes (excede 5MB, comprimiendo...)");
+
+        try {
+            BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(imageBytes));
+            if (originalImage == null) {
+                System.err.println("⚠️ No se pudo decodificar la imagen: " + label);
+                return null;
+            }
+
+            // Intentar comprimir reduciendo calidad y/o tamaño
+            double scale = 1.0;
+            byte[] result = imageBytes;
+
+            while (result.length > MAX_IMAGE_BYTES && scale > 0.1) {
+                scale -= 0.2;
+                if (scale < 0.1) scale = 0.1;
+
+                int newWidth = (int) (originalImage.getWidth() * scale);
+                int newHeight = (int) (originalImage.getHeight() * scale);
+
+                // Redimensionar
+                BufferedImage resized = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+                Graphics2D g = resized.createGraphics();
+                g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                g.drawImage(originalImage, 0, 0, newWidth, newHeight, Color.WHITE, null);
+                g.dispose();
+
+                // Codificar como JPEG con calidad 85%
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ImageIO.write(resized, "jpg", baos);
+                result = baos.toByteArray();
+
+                System.out.println("   → Escala " + String.format("%.0f%%", scale * 100)
+                        + " (" + newWidth + "x" + newHeight + "): " + result.length + " bytes");
+            }
+
+            System.out.println("✅ " + label + " comprimido: " + result.length + " bytes");
+            return result;
+
+        } catch (Exception e) {
+            System.err.println("❌ Error al comprimir " + label + ": " + e.getMessage());
+            return null;
         }
     }
 
