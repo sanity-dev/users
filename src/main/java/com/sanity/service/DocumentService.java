@@ -127,13 +127,25 @@ public class DocumentService {
                     map.put("status", d.getEstado().toLowerCase());
                     map.put("uploadedAt", d.getFechaSubida().toString());
                     map.put("motivoRechazo", d.getMotivoRechazo() != null ? d.getMotivoRechazo() : "");
+                    map.put("verificacionFacial", d.getVerificacionFacial() != null ? d.getVerificacionFacial() : "PENDIENTE");
+                    map.put("selfieUrl", d.getSelfieUrl() != null ? d.getSelfieUrl() : "");
                     return (Map<String, String>) map;
                 })
                 .collect(Collectors.toList());
 
-        return Map.of(
-                "status", estadoGlobal,
-                "documents", docs
-        );
+        // Determinar estado de verificación facial
+        String estadoFacial = "pendiente";
+        Optional<DocumentoTerapeuta> docIdentificacion = documentos.stream()
+                .filter(d -> "identificacion".equals(d.getTipoDocumento()))
+                .findFirst();
+        if (docIdentificacion.isPresent() && docIdentificacion.get().getVerificacionFacial() != null) {
+            estadoFacial = docIdentificacion.get().getVerificacionFacial().toLowerCase();
+        }
+
+        java.util.HashMap<String, Object> result = new java.util.HashMap<>();
+        result.put("status", estadoGlobal);
+        result.put("documents", docs);
+        result.put("faceVerification", estadoFacial);
+        return result;
     }
 }

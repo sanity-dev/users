@@ -34,3 +34,6 @@ build/
 
 ### Google Cloud credentials ###
 gcs-credentials.json
+/.apt_generated_tests/
+
+.env
